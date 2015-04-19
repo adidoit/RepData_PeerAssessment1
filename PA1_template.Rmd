@@ -8,18 +8,55 @@ output:
 
 ## Loading and preprocessing the data
 
+The activity.csv in the current folder is loaded
+```{r,echo=TRUE}
+activity <- read.csv('activity.csv')
+```
 
 
 ## What is mean total number of steps taken per day?
 
-
-
+```{r,echo=TRUE}
+summary(activity$steps)
+hist(activity$steps)
+totalSteps <- sum(activity$steps,na.rm=TRUE)
+print(totalSteps)
+meanSteps <- mean(activity$steps,na.rm=TRUE)
+print(meanSteps)
+medianSteps <- median(activity$steps,na.rm=TRUE)
+print(medianSteps)
+```
 ## What is the average daily activity pattern?
-
-
-
+```{r,echo=TRUE,warning=FALSE}
+aggregateSteps <- aggregate(activity,list(activity$interval),mean,na.rm=TRUE)
+plot(aggregateSteps$interval,aggregateSteps$steps,type="l")
+maxSteps <- which.max(aggregateSteps$steps)
+aggregateSteps[maxSteps,]["interval"]
+```
 ## Imputing missing values
 
+0 is the most common value so it is assumed for the NA
 
+```{r,echo=TRUE}
+colSums(is.na(activity))
+numSteps <- subset(activity,!is.na(activity$steps))
+naSteps <- subset(activity,is.na(activity$steps))
+str(numSteps)
+str(naSteps)
+for(i in seq(1:dim(naSteps))){
+  naSteps[i,"steps"] <- 0
+  }
+str(naSteps)
+stepsImputed <- rbind(numSteps,naSteps)
+str(stepsImputed)
+byDate <- tapply(stepsImputed$steps,stepsImputed$date,sum)
+hist(byDate)
+# mean steps by date
+tapply(stepsImputed$steps,stepsImputed$date,mean)
+
+# median steps by date
+tapply(stepsImputed$steps,stepsImputed$date,median)
+```
+Looks like doing a simple imputation as above had a major impact on the data. Need a better approach for this. 
 
 ## Are there differences in activity patterns between weekdays and weekends?
